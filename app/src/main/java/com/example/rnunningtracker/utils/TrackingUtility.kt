@@ -2,7 +2,9 @@ package com.example.rnunningtracker.utils
 
 import android.Manifest
 import android.content.Context
+import android.location.Location
 import android.os.Build
+import com.example.rnunningtracker.services.Polyline
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.concurrent.TimeUnit
 
@@ -44,5 +46,17 @@ object TrackingUtility {
                     "${if (minutes < 10) "0" else ""}$minutes:" +
                     "${if (seconds < 10) "0" else ""}$seconds"
         }
+    }
+
+    fun calculatePolylineLength(polyline: Polyline): Float {
+        var distance = 0f
+        val result = FloatArray(1)
+        for (i in 0..polyline.size-2) {
+            val pos1 = polyline[i]
+            val pos2 = polyline[i+1]
+            Location.distanceBetween(pos1.latitude, pos1.longitude, pos2.latitude, pos2.longitude, result)
+            distance += result[0]
+        }
+        return distance
     }
 }

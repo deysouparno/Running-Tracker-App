@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         navigateToTrackingFragmentIfNeeded(intent)
-//        setSupportActionBar(binding.toolbar)
+        setSupportActionBar(binding.toolbar)
 
         binding.bottomNavigationView.setupWithNavController(findNavController(R.id.navHostFragment))
 

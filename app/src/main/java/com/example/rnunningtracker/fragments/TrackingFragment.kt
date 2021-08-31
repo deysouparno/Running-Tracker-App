@@ -3,12 +3,13 @@ package com.example.rnunningtracker.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.rnunningtracker.R
+import com.example.rnunningtracker.databinding.ActivityMainBinding
 import com.example.rnunningtracker.databinding.FragmentTrackingBinding
+import com.example.rnunningtracker.databse.Run
 import com.example.rnunningtracker.services.Polyline
 import com.example.rnunningtracker.services.TrackingService
 import com.example.rnunningtracker.utils.Constants.ACTION_PAUSE_SERVICE
@@ -21,9 +22,14 @@ import com.example.rnunningtracker.utils.TrackingUtility
 import com.example.rnunningtracker.viewmodels.MainViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
+import javax.inject.Inject
+import kotlin.math.round
 
 
 @AndroidEntryPoint
@@ -37,6 +43,9 @@ class TrackingFragment : Fragment() {
     private var currentTimeMillis = 0L
     private var menu: Menu? = null
 
+    @set:Inject
+    var weight = 60f
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -45,6 +54,11 @@ class TrackingFragment : Fragment() {
         binding = FragmentTrackingBinding.inflate(inflater)
         binding.btnToggleRun.setOnClickListener {
             toggleRun()
+        }
+
+        binding.btnFinishRun.setOnClickListener {
+            zoomToSeeWholeTrack()
+            endRunAndSaveToDb()
         }
         return binding.root
     }
@@ -159,6 +173,50 @@ class TrackingFragment : Fragment() {
                     MAP_ZOOM
                 )
             )
+        }
+    }
+
+    private fun zoomToSeeWholeTrack() {
+        val bounds = LatLngBounds.Builder()
+        for (polyline in pathPoints) {
+            for (pos in polyline) {
+                bounds.include(pos)
+            }
+        }
+        map?.moveCamera(
+            CameraUpdateFactory.newLatLngBounds(
+                bounds.build(),
+                binding.mapView.width,
+                binding.mapView.height,
+                (binding.mapView.height * 0.05f).toInt()
+            )
+        )
+    }
+
+    private fun endRunAndSaveToDb() {
+        map?.snapshot {
+            var distanceInMeters = 0
+            for (polyline in pathPoints) {
+                distanceInMeters += TrackingUtility.calculatePolylineLength(polyline).toInt()
+            }
+            val avgSpeed = round((distanceInMeters / 1000f) / (currentTimeMillis / 1000f / 60 / 60) * 10) / 10f
+            val dateTimeStamp = Calendar.getInstance().timeInMillis
+            val caloriesBurned = ((distanceInMeters / 1000f) * weight).toInt()
+            val run = Run(
+                it,
+                dateTimeStamp,
+                avgSpeed,
+                distanceInMeters,
+                currentTimeMillis,
+                caloriesBurned
+            )
+            viewmodel.insertRun(run)
+
+//            Snackbar.make(
+//                requireActivity().findViewById(R.id.activ)
+//            )
+
+            stopRun()
         }
     }
 

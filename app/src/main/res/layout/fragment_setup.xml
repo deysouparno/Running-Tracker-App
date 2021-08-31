@@ -21,7 +21,7 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilName"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="40dp"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
@@ -43,9 +43,10 @@
         android:id="@+id/tilWeight"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="50dp"
         android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="40dp"
-        app:layout_constraintEnd_toEndOf="@+id/tvWeight"
+
+        app:layout_constraintEnd_toEndOf="@+id/tilName"
         app:layout_constraintStart_toStartOf="@+id/tilName"
         app:layout_constraintTop_toBottomOf="@+id/tilName">
 
@@ -67,7 +68,7 @@
         android:textSize="24sp"
         android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="@+id/tilWeight"
-        app:layout_constraintEnd_toEndOf="@+id/tilName"
+
         app:layout_constraintLeft_toRightOf="@id/tilWeight"
         app:layout_constraintTop_toTopOf="@+id/tilWeight" />
 
